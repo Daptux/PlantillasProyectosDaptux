@@ -1,0 +1,63 @@
+/* =====================================================================
+   DETALLE DE HABITACIÓN — premium (galería, confianza, política)
+   ===================================================================== */
+
+/* -------- Galería -------- */
+.rd-gallery { display: grid; grid-template-columns: 2.1fr 1fr; gap: 12px; margin-bottom: 8px; }
+.rd-main-img {
+  height: 400px;
+  border-radius: 18px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  box-shadow: var(--sh-md);
+}
+.rd-main-img .ptipo {
+  position: absolute; top: 16px; left: 16px;
+  background: rgba(15,39,66,.85); color: #fff; backdrop-filter: blur(4px);
+  font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; text-transform: uppercase;
+}
+.rd-thumbs { display: grid; grid-template-rows: repeat(3, 1fr); gap: 12px; }
+.rd-thumb {
+  border-radius: 14px;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .18s var(--ease), border-color .18s;
+}
+.rd-thumb:hover { transform: translateY(-2px); }
+.rd-thumb.active { border-color: var(--l-gold); box-shadow: var(--sh-gold); }
+
+/* -------- Cards de confianza -------- */
+.rd-trust { display: flex; gap: 10px; margin: 16px 0 4px; flex-wrap: wrap; }
+.rd-trust div {
+  flex: 1; min-width: 120px;
+  background: var(--l-cream);
+  border: 1px solid #efe7d2;
+  border-radius: 12px;
+  padding: 13px 10px;
+  text-align: center;
+  font-size: 12px; font-weight: 600; color: var(--l-navy);
+}
+.rd-trust div span { display: block; font-size: 20px; margin-bottom: 5px; }
+
+/* -------- Política de cancelación -------- */
+.rd-policy {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #166534;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.rd-policy b { color: #14532d; }
+
+/* -------- Responsive -------- */
+@media (max-width: 760px) {
+  .rd-gallery { grid-template-columns: 1fr; }
+  .rd-main-img { height: 260px; }
+  .rd-thumbs { grid-template-rows: none; grid-template-columns: repeat(3, 1fr); height: 90px; }
+}

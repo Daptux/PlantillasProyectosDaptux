@@ -1,0 +1,103 @@
+/* =====================================================================
+   AUTENTICACIÓN — Login / Registro premium (layout split)
+   ===================================================================== */
+.auth-split {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+}
+
+/* ---- Panel visual ---- */
+.auth-aside {
+  position: relative;
+  color: #fff;
+  padding: 52px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(160deg, rgba(10,26,47,.82), rgba(15,55,92,.8)),
+    url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=75') center/cover;
+}
+.auth-aside .a-brand { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; }
+.auth-aside .a-brand span { color: var(--gold-400); }
+.auth-aside .a-hero h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.4vw, 42px);
+  line-height: 1.12;
+  margin-bottom: 14px;
+  text-shadow: 0 4px 24px rgba(0,0,0,.35);
+}
+.auth-aside .a-hero p { color: #d4dde8; max-width: 440px; font-size: 16px; }
+.auth-aside .a-trust { display: flex; flex-direction: column; gap: 13px; }
+.auth-aside .a-trust span { display: flex; align-items: center; gap: 11px; font-size: 14px; color: #e6ecf3; }
+.auth-aside .a-trust i {
+  width: 26px; height: 26px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(201,162,39,.25); color: var(--gold-400);
+  font-style: normal; font-size: 13px; font-weight: 800;
+}
+
+/* ---- Panel formulario ---- */
+.auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 44px 26px;
+  background:
+    radial-gradient(800px 500px at 100% 0%, #fbf7ec, transparent 60%),
+    var(--bg);
+}
+.auth-card { width: 100%; max-width: 420px; animation: pop .35s var(--ease); }
+.auth-card .a-logo-m { display: none; }
+.auth-back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; font-weight: 500; margin-bottom: 20px; transition: color .15s; }
+.auth-back:hover { color: var(--navy-700); }
+.auth-card h1 { font-family: 'Playfair Display', serif; color: var(--navy-800); font-size: 28px; }
+.auth-card .sub { color: var(--muted); margin: 4px 0 24px; }
+.auth-card .btn { width: 100%; margin-top: 8px; padding: 12px; font-size: 15px; }
+.auth-foot { text-align: center; margin-top: 18px; font-size: 13px; color: var(--muted); }
+.auth-foot a { color: var(--gold-600); font-weight: 700; }
+
+/* ---- Campo de contraseña con ojo ---- */
+.pw-wrap { position: relative; }
+.pw-wrap .input { padding-right: 44px; }
+.pw-eye {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: #6b7280;
+  display: flex; align-items: center; padding: 6px; border-radius: 6px;
+}
+.pw-eye:hover { color: var(--navy-700); background: #f3f4f6; }
+
+/* ---- Spinner pequeño dentro del botón ---- */
+.spinner-sm {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin .7s linear infinite;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 880px) {
+  .auth-split { grid-template-columns: 1fr; }
+  .auth-aside { display: none; }
+  .auth-main {
+    background:
+      linear-gradient(180deg, rgba(10,26,47,.72), rgba(10,26,47,.84)),
+      url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=70') center/cover fixed;
+  }
+  .auth-card {
+    background: #fff;
+    padding: 30px 24px;
+    border-radius: 20px;
+    box-shadow: var(--sh-lg);
+  }
+  .auth-card .a-logo-m {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 800; color: var(--navy-800);
+    text-align: center; margin-bottom: 4px;
+  }
+  .auth-card .a-logo-m span { color: var(--gold-600); }
+}
