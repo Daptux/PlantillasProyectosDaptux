@@ -1,0 +1,40 @@
+import { Router } from "express";
+import authRoutes from "./auth.routes";
+import usersRoutes from "./users.routes";
+import clinicsRoutes from "./clinics.routes";
+import patientsRoutes from "./patients.routes";
+import doctorsRoutes from "./doctors.routes";
+import servicesRoutes from "./services.routes";
+import specialtyRoutes from "./specialty.routes";
+import sedeRoutes from "./sede.routes";
+import appointmentsRoutes from "./appointments.routes";
+import documentsRoutes from "./documents.routes";
+import resultsRoutes from "./results.routes";
+import paymentsRoutes from "./payments.routes";
+import pqrsfRoutes from "./pqrsf.routes";
+import landingRoutes from "./landing.routes";
+import dashboardRoutes from "./dashboard.routes";
+import notificationsRoutes from "./notifications.routes";
+import publicRoutes from "./public.routes";
+
+const router = Router();
+
+router.use("/auth", authRoutes);
+router.use("/users", usersRoutes);
+router.use("/clinics", clinicsRoutes);
+router.use("/patients", patientsRoutes);
+router.use("/doctors", doctorsRoutes);
+router.use("/services", servicesRoutes);
+router.use("/specialties", specialtyRoutes);
+router.use("/sedes", sedeRoutes);
+router.use("/appointments", appointmentsRoutes);
+router.use("/documents", documentsRoutes);
+router.use("/results", resultsRoutes);
+router.use("/payments", paymentsRoutes);
+router.use("/pqrsf", pqrsfRoutes);
+router.use("/landing", landingRoutes);
+router.use("/dashboard", dashboardRoutes);
+router.use("/notifications", notificationsRoutes);
+router.use("/public", publicRoutes);
+
+export default router;
