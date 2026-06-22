@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans text-slate-700 bg-white antialiased;
+  }
+}
+
+@layer components {
+  /* Botones */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  .btn-primary {
+    @apply btn bg-brand-500 text-white hover:bg-brand-600 shadow-soft focus:ring-brand-400;
+  }
+  .btn-secondary {
+    @apply btn bg-teal-500 text-white hover:bg-teal-600 focus:ring-teal-400;
+  }
+  .btn-outline {
+    @apply btn border-2 border-brand-500 text-brand-600 hover:bg-brand-50 focus:ring-brand-300;
+  }
+  .btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100;
+  }
+  .btn-danger {
+    @apply btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-300;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm rounded-lg;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-700 placeholder-slate-400
+      focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition;
+  }
+  .label {
+    @apply block text-sm font-medium text-slate-600 mb-1;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl border border-slate-100 shadow-sm;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+}
+
+/* Scrollbar suave */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-slate-400; }
