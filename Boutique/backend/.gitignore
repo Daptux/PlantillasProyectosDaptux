@@ -1,0 +1,7 @@
+node_modules/
+.env
+src/uploads/**/*
+!src/uploads/products/.gitkeep
+!src/uploads/banners/.gitkeep
+!src/uploads/users/.gitkeep
+npm-debug.log
