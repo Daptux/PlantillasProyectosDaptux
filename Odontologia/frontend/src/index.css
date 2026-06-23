@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-slate-50 text-ink font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* Botones reutilizables */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-brand-500 text-white hover:bg-brand-600 focus:ring-brand-400 shadow-card;
+  }
+  .btn-secondary {
+    @apply btn bg-teal-500 text-white hover:bg-teal-600 focus:ring-teal-400;
+  }
+  .btn-outline {
+    @apply btn border border-brand-500 text-brand-600 hover:bg-brand-50;
+  }
+  .btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100;
+  }
+  .btn-danger {
+    @apply btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-400;
+  }
+
+  /* Tarjetas */
+  .card {
+    @apply rounded-2xl bg-white shadow-card border border-slate-100;
+  }
+
+  /* Inputs de formularios */
+  .input {
+    @apply w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-ink placeholder-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition;
+  }
+  .label {
+    @apply block text-sm font-medium text-slate-700 mb-1.5;
+  }
+
+  /* Badges de estado */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+}
