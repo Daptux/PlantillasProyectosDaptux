@@ -1,5 +1,9 @@
 import { pool } from '../config/db.js';
 import { asyncHandler, ApiError, buildOrderNumber, getPagination } from '../utils/helpers.js';
+import { wompi, integritySignature } from '../config/wompi.js';
+
+// Métodos que se pagan en línea con la pasarela (Wompi)
+const METODOS_ONLINE = ['TARJETA', 'NEQUI', 'DAVIPLATA'];
 
 const ESTADOS = ['PENDIENTE', 'CONFIRMADO', 'PREPARANDO', 'ENVIADO', 'ENTREGADO', 'CANCELADO'];
 const ESTADOS_PAGO = ['PENDIENTE', 'PAGADO', 'RECHAZADO', 'REEMBOLSADO'];
@@ -130,7 +134,27 @@ export const createOrder = asyncHandler(async (req, res) => {
     await conn.query('DELETE FROM cart_items WHERE cart_id = ?', [cartId]);
 
     await conn.commit();
-    res.status(201).json({ message: 'Pedido creado', order_id: orderId, numero, total });
+
+    // Si el pago es en línea, devolvemos ya los datos firmados para abrir Wompi
+    // (evita una segunda llamada y un punto de falla en el checkout).
+    let wompiData = null;
+    const metodoFinal = metodo_pago || 'CONTRA_ENTREGA';
+    if (METODOS_ONLINE.includes(metodoFinal) && wompi.publicKey && wompi.integritySecret) {
+      const amountInCents = Math.round(Number(total) * 100);
+      wompiData = {
+        publicKey: wompi.publicKey,
+        checkoutUrl: wompi.checkoutUrl,
+        currency: wompi.currency,
+        amountInCents,
+        reference: numero,
+        signature: integritySignature(numero, amountInCents, wompi.currency),
+        email: req.user.email,
+        fullName: nombre_cliente || req.user.nombre,
+        phone: telefono || req.user.telefono,
+      };
+    }
+
+    res.status(201).json({ message: 'Pedido creado', order_id: orderId, numero, total, wompi: wompiData });
   } catch (err) {
     await conn.rollback();
     throw err;
@@ -256,6 +280,63 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     conn.release();
   }
 });
+
+// ============================================================
+//  Confirmación de pago (usado por Wompi: webhook y verificación)
+// ============================================================
+
+// Marca un pedido como PAGADO. Si aún estaba PENDIENTE, descuenta inventario
+// y lo pasa a CONFIRMADO. Es idempotente (no descuenta dos veces).
+export async function markOrderPaid(orderId, { transactionId, methodLabel } = {}) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [orders] = await conn.query('SELECT * FROM orders WHERE id = ? FOR UPDATE', [orderId]);
+    if (!orders.length) { await conn.rollback(); return false; }
+    const order = orders[0];
+
+    // Descontar stock solo si el pedido todavía no lo tomó
+    if (order.estado === 'PENDIENTE') {
+      const [items] = await conn.query('SELECT * FROM order_items WHERE order_id = ? AND variant_id IS NOT NULL', [orderId]);
+      for (const it of items) {
+        const [v] = await conn.query('SELECT stock FROM product_variants WHERE id = ? FOR UPDATE', [it.variant_id]);
+        if (!v.length) continue;
+        const stockAnterior = v[0].stock;
+        const stockNuevo = Math.max(0, stockAnterior - it.cantidad);
+        await conn.query('UPDATE product_variants SET stock = ? WHERE id = ?', [stockNuevo, it.variant_id]);
+        await conn.query(
+          `INSERT INTO inventory_movements (variant_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo, order_id)
+           VALUES (?, 'VENTA', ?, ?, ?, ?, ?)`,
+          [it.variant_id, it.cantidad, stockAnterior, stockNuevo, `Venta pagada pedido ${order.numero}`, orderId]
+        );
+        await conn.query('UPDATE products SET ventas = ventas + ? WHERE id = ?', [it.cantidad, it.product_id]);
+      }
+      await conn.query("UPDATE orders SET estado = 'CONFIRMADO' WHERE id = ?", [orderId]);
+    }
+
+    await conn.query("UPDATE orders SET estado_pago = 'PAGADO' WHERE id = ?", [orderId]);
+    await conn.query(
+      "UPDATE payments SET estado = 'PAGADO', referencia = ?, metodo = ? WHERE order_id = ?",
+      [transactionId || null, methodLabel || 'WOMPI', orderId]
+    );
+    await conn.commit();
+    return true;
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+
+// Marca el pago como RECHAZADO (no cancela el pedido; el cliente puede reintentar).
+export async function markOrderPaymentFailed(orderId, { transactionId, methodLabel } = {}) {
+  await pool.query("UPDATE orders SET estado_pago = 'RECHAZADO' WHERE id = ? AND estado_pago <> 'PAGADO'", [orderId]);
+  await pool.query(
+    "UPDATE payments SET estado = 'RECHAZADO', referencia = ?, metodo = ? WHERE order_id = ?",
+    [transactionId || null, methodLabel || 'WOMPI', orderId]
+  );
+}
 
 // PUT /api/admin/orders/:id/payment-status
 export const updatePaymentStatus = asyncHandler(async (req, res) => {

@@ -14,6 +14,7 @@ import categoriesRoutes from './routes/categories.routes.js';
 import brandsRoutes from './routes/brands.routes.js';
 import cartRoutes from './routes/cart.routes.js';
 import ordersRoutes from './routes/orders.routes.js';
+import paymentsRoutes from './routes/payments.routes.js';
 import inventoryRoutes from './routes/inventory.routes.js';
 import couponsRoutes from './routes/coupons.routes.js';
 import bannersRoutes from './routes/banners.routes.js';
@@ -56,6 +57,7 @@ app.use('/api/brands', brandsRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/uploads', uploadsRoutes);
+app.use('/api/payments', paymentsRoutes); // /api/payments/wompi/*
 app.use('/api', ordersRoutes);     // /api/orders/* y /api/admin/orders/*
 app.use('/api', couponsRoutes);    // /api/coupons/validate y /api/admin/coupons/*
 app.use('/api', bannersRoutes);    // /api/banners y /api/admin/banners/*

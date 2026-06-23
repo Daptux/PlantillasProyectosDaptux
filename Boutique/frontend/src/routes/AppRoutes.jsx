@@ -18,6 +18,7 @@ import Profile from '../pages/public/Profile.jsx';
 import Favorites from '../pages/public/Favorites.jsx';
 import MyOrders from '../pages/public/MyOrders.jsx';
 import OrderDetail from '../pages/public/OrderDetail.jsx';
+import PaymentResult from '../pages/public/PaymentResult.jsx';
 
 // Admin
 import AdminDashboard from '../pages/admin/AdminDashboard.jsx';
@@ -49,6 +50,7 @@ export default function AppRoutes() {
         <Route path="/carrito" element={<Cart />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
+        <Route path="/pago/resultado" element={<PaymentResult />} />
 
         {/* requieren sesión */}
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />

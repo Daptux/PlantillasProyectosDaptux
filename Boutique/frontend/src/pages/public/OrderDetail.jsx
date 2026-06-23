@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { IoArrowBack, IoLocationOutline, IoReceiptOutline } from 'react-icons/io5';
 import { orderService } from '../../services/order.service.js';
+import { paymentService, buildWompiCheckoutUrl } from '../../services/payment.service.js';
 import { resolveImage } from '../../services/api.js';
 import { formatPrice, formatDateTime, ORDER_STATUS, PAYMENT_STATUS } from '../../utils/format.js';
 import Loader from '../../components/common/Loader.jsx';
@@ -13,6 +14,20 @@ export default function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);
   const [error, setError] = useState('');
+  const [paying, setPaying] = useState(false);
+
+  async function pagarAhora() {
+    setPaying(true);
+    setError('');
+    try {
+      const init = await paymentService.initWompi(order.id);
+      const redirectUrl = `${window.location.origin}/pago/resultado?order=${order.id}`;
+      window.location.href = buildWompiCheckoutUrl(init, redirectUrl);
+    } catch (err) {
+      setError(err.response?.data?.message || 'No se pudo iniciar el pago');
+      setPaying(false);
+    }
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -158,9 +173,17 @@ export default function OrderDetail() {
             <div className="mt-4 border-t border-neutral-100 pt-4 text-sm">
               <div className="flex justify-between">
                 <span className="text-neutral-500">Método de pago</span>
-                <span className="text-ink">{order.metodo_pago}</span>
+                <span className="text-ink">{order.metodo_pago === 'CONTRA_ENTREGA' ? 'Contra entrega' : 'Pago en línea'}</span>
               </div>
             </div>
+
+            {/* Reintentar pago en línea si quedó pendiente/rechazado */}
+            {order.estado_pago !== 'PAGADO' && order.estado !== 'CANCELADO' && order.metodo_pago !== 'CONTRA_ENTREGA' && (
+              <Button variant="primary" className="mt-4 w-full" onClick={pagarAhora} disabled={paying}>
+                {paying ? 'Redirigiendo...' : `Pagar ahora ${formatPrice(order.total)}`}
+              </Button>
+            )}
+            {error && <Alert type="error" className="mt-3">{error}</Alert>}
           </div>
         </div>
       </div>
