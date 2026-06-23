@@ -5,7 +5,8 @@ import { es } from 'react-day-picker/locale';
 import 'react-day-picker/style.css';
 import { useAuth } from '../context/AuthContext';
 import { obtenerHabitacionPublica, verificarDisponibilidad, fechasOcupadas } from '../services/habitacionesService';
-import { crearReserva } from '../services/reservasService';
+import { iniciarCheckout, confirmarPagoWompi } from '../services/pagosService';
+import { cargarWidgetWompi, abrirWidgetWompi } from '../utils/wompi';
 import { formatMoney, formatFecha, getError } from '../utils/helpers';
 import { imgHab } from '../utils/roomImages';
 import PublicNavbar from '../components/PublicNavbar';
@@ -25,6 +26,25 @@ const parseYMD = (s) => { const [y, m, d] = String(s).slice(0, 10).split('-').ma
 const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
 const hoyLocal = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Espera la confirmación del pago consultando el backend (que verifica
+// contra la API de Wompi). La TARJETA aprueba al instante; los métodos
+// asíncronos (Nequi, DaviPlata, PSE, transferencias...) nacen en PENDING
+// y se aprueban a los pocos segundos, por eso reconsultamos varias veces.
+async function esperarConfirmacion(transaccionId, onPendiente) {
+  const INTENTOS = 40;     // ~2 minutos
+  const ESPERA_MS = 3000;
+  let ultimo = null;
+  for (let i = 0; i < INTENTOS; i++) {
+    ultimo = await confirmarPagoWompi(transaccionId);
+    if (ultimo.estado !== 'PENDIENTE') return ultimo; // APROBADO / RECHAZADO / CONFLICTO
+    if (onPendiente) onPendiente(i + 1, INTENTOS);
+    await sleep(ESPERA_MS);
+  }
+  return ultimo || { estado: 'PENDIENTE' };
+}
+
 export default function RoomDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -35,6 +55,7 @@ export default function RoomDetail() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [reservando, setReservando] = useState(false);
+  const [infoPago, setInfoPago] = useState('');
 
   const [ocupadas, setOcupadas] = useState([]);
   const [range, setRange] = useState(undefined);
@@ -50,6 +71,28 @@ export default function RoomDetail() {
       .finally(() => setCargando(false));
     fechasOcupadas(id).then(setOcupadas).catch(() => setOcupadas([]));
   }, [id]);
+
+  // Si el cliente venía de "Reservar" sin sesión, al volver logueado
+  // retomamos sus fechas para que sólo tenga que completar el pago.
+  // (No se crea nada hasta pagar.)
+  useEffect(() => {
+    if (!hab) return;
+    const raw = localStorage.getItem('reservaPendiente');
+    if (!raw) return;
+    try {
+      const pend = JSON.parse(raw);
+      if (
+        String(pend.id_habitacion) === String(hab.id_habitacion) &&
+        pend.fecha_entrada && pend.fecha_salida
+      ) {
+        setRange({ from: parseYMD(pend.fecha_entrada), to: parseYMD(pend.fecha_salida) });
+        setFechas({ fecha_entrada: pend.fecha_entrada, fecha_salida: pend.fecha_salida });
+      }
+    } catch {
+      // ignorar datos corruptos
+    }
+    localStorage.removeItem('reservaPendiente');
+  }, [hab]);
 
   const rangosOcupados = useMemo(
     () => ocupadas.map((o) => ({ from: parseYMD(o.fecha_entrada), to: addDays(parseYMD(o.fecha_salida), -1) })),
@@ -105,24 +148,65 @@ export default function RoomDetail() {
 
     setReservando(true);
     try {
-      const res = await crearReserva({
+      // 1) Crear el intento de pago en el backend (aún NO hay reserva).
+      const checkout = await iniciarCheckout({
         id_habitacion: hab.id_habitacion,
         fecha_entrada: fechas.fecha_entrada,
         fecha_salida: fechas.fecha_salida
       });
-      const r = res.reserva || {};
-      navigate('/reserva-confirmada', {
-        state: {
-          id_reserva: r.id_reserva,
-          numero: hab.numero,
-          tipo: hab.tipo,
-          fecha_entrada: fechas.fecha_entrada,
-          fecha_salida: fechas.fecha_salida,
-          noches: r.noches ?? noches,
-          total: r.total ?? total
-        }
+
+      // 2) Abrir el widget de Wompi y esperar a que el cliente pague.
+      await cargarWidgetWompi();
+      const transaccion = await abrirWidgetWompi({
+        publicKey: checkout.llavePublica,
+        currency: checkout.moneda,
+        amountInCents: checkout.montoCentavos,
+        reference: checkout.referencia,
+        signatureIntegrity: checkout.firmaIntegridad
       });
+
+      // El cliente cerró el widget sin completar el pago.
+      if (!transaccion) {
+        setError('Pago cancelado. La reserva no se realizó.');
+        setReservando(false);
+        return;
+      }
+
+      // 3) Confirmar el pago. La tarjeta queda aprobada al instante; los
+      //    métodos asíncronos (Nequi, PSE, transferencias) quedan en PENDING
+      //    y se confirman tras unos segundos -> esperamos con polling.
+      //    La reserva sólo se crea cuando el pago queda APROBADO.
+      setInfoPago('⏳ Confirmando tu pago...');
+      const conf = await esperarConfirmacion(transaccion.id, () =>
+        setInfoPago('⏳ Esperando la aprobación de tu pago, no cierres esta ventana...')
+      );
+      setInfoPago('');
+
+      if (conf.estado === 'APROBADO') {
+        navigate('/reserva-confirmada', {
+          state: {
+            id_reserva: conf.id_reserva,
+            numero: hab.numero,
+            tipo: hab.tipo,
+            fecha_entrada: fechas.fecha_entrada,
+            fecha_salida: fechas.fecha_salida,
+            noches,
+            total,
+            pago: 'APROBADO'
+          }
+        });
+      } else if (conf.estado === 'CONFLICTO') {
+        setError(conf.mensaje || 'El pago se realizó pero la habitación ya no estaba disponible. Te contactaremos para el reembolso.');
+        setReservando(false);
+      } else if (conf.estado === 'PENDIENTE') {
+        setError('Tu pago quedó en proceso. Si lo apruebas en tu app, la reserva se confirmará automáticamente; revisa "Mis reservas" en unos minutos.');
+        setReservando(false);
+      } else {
+        setError(`El pago no fue aprobado (estado: ${conf.estado_wompi || conf.estado}). No se realizó la reserva. Puedes intentarlo de nuevo.`);
+        setReservando(false);
+      }
     } catch (err) {
+      setInfoPago('');
       setError(getError(err));
       setReservando(false);
     }
@@ -231,8 +315,18 @@ export default function RoomDetail() {
                     )}
 
                     <button type="submit" className="btn-gold" disabled={reservando || verificando || dispo === false}>
-                      {reservando ? 'Reservando...' : 'Reservar'}
+                      {reservando ? 'Procesando pago...' : 'Pagar y reservar'}
                     </button>
+
+                    {infoPago && (
+                      <div style={{ marginTop: 10, fontSize: 13, fontWeight: 600, color: '#2563eb', textAlign: 'center' }}>
+                        {infoPago}
+                      </div>
+                    )}
+
+                    <div style={{ marginTop: 8, fontSize: 12, color: '#6b7280', textAlign: 'center' }}>
+                      🔒 Pago seguro procesado por Wompi
+                    </div>
                   </form>
                 )}
               </aside>

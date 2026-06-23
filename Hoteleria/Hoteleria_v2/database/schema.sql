@@ -82,15 +82,51 @@ CREATE TABLE IF NOT EXISTS reservas (
 -- TABLA: pagos
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pagos (
-  id_pago             INT(11)      NOT NULL AUTO_INCREMENT,
-  id_reserva          INT(11)      NOT NULL,
-  metodo_pago         ENUM('EFECTIVO','TARJETA','TRANSFERENCIA') NOT NULL,
-  monto               DECIMAL(10,2) NOT NULL,
-  estado              ENUM('PENDIENTE','PAGADO','RECHAZADO') NOT NULL DEFAULT 'PENDIENTE',
-  fecha_pago          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id_pago              INT(11)      NOT NULL AUTO_INCREMENT,
+  id_reserva           INT(11)      NOT NULL,
+  metodo_pago          ENUM('EFECTIVO','TARJETA','TRANSFERENCIA','WOMPI') NOT NULL,
+  monto                DECIMAL(10,2) NOT NULL,
+  referencia           VARCHAR(80)  NULL,               -- referencia de la pasarela (Wompi)
+  wompi_transaction_id VARCHAR(60)  NULL,               -- id de transacción en Wompi
+  estado               ENUM('PENDIENTE','PAGADO','RECHAZADO') NOT NULL DEFAULT 'PENDIENTE',
+  fecha_pago           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id_pago),
   KEY idx_pagos_reserva (id_reserva),
   CONSTRAINT fk_pagos_reserva
     FOREIGN KEY (id_reserva) REFERENCES reservas (id_reserva)
     ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- TABLA: pagos_intentos  (pasarela Wompi)
+-- Guarda los datos de una reserva mientras el cliente paga en Wompi.
+-- La reserva sólo se crea cuando el pago queda APROBADO.
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS pagos_intentos (
+  id_intento           INT(11)      NOT NULL AUTO_INCREMENT,
+  referencia           VARCHAR(80)  NOT NULL,
+  id_usuario           INT(11)      NOT NULL,
+  id_habitacion        INT(11)      NOT NULL,
+  fecha_entrada        DATE         NOT NULL,
+  fecha_salida         DATE         NOT NULL,
+  monto                DECIMAL(10,2) NOT NULL,
+  estado               ENUM('PENDIENTE','APROBADO','RECHAZADO','CONFLICTO') NOT NULL DEFAULT 'PENDIENTE',
+  wompi_transaction_id VARCHAR(60)  NULL,
+  id_reserva           INT(11)      NULL,
+  fecha_creacion       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_intento),
+  UNIQUE KEY uq_pagos_intentos_referencia (referencia),
+  KEY idx_pagos_intentos_usuario (id_usuario),
+  KEY idx_pagos_intentos_habitacion (id_habitacion),
+  KEY idx_pagos_intentos_estado (estado),
+  CONSTRAINT fk_pagos_intentos_usuario
+    FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_pagos_intentos_habitacion
+    FOREIGN KEY (id_habitacion) REFERENCES habitaciones (id_habitacion)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_pagos_intentos_reserva
+    FOREIGN KEY (id_reserva) REFERENCES reservas (id_reserva)
+    ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

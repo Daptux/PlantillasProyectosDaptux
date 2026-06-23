@@ -21,6 +21,16 @@ export default function ReservaConfirmada() {
         <h1>¡Reserva confirmada!</h1>
         <p className="conf-sub">Tu reserva ha sido registrada correctamente. Te esperamos. 🏨</p>
 
+        {state.pago === 'APROBADO' && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: '#dcfce7', color: '#166534', fontWeight: 700,
+            padding: '6px 14px', borderRadius: 999, fontSize: 14, margin: '0 0 4px'
+          }}>
+            ✓ Pago aprobado
+          </div>
+        )}
+
         <div className="conf-code">
           <div className="lbl">Código de reserva</div>
           <div className="val">{codigo}</div>

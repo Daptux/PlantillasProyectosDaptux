@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { crearReserva } from '../services/reservasService';
 import { getError } from '../utils/helpers';
 import Alert from '../components/Alert';
 import EyeIcon from '../components/EyeIcon';
@@ -26,17 +25,20 @@ export default function Login() {
     try {
       const usuario = await login(email, password);
 
-      // Reserva pendiente hecha sin sesión -> se crea al iniciar sesión
+      // Si venía de "Reservar" sin sesión, lo devolvemos a la habitación para
+      // que complete el PAGO. NO se crea ninguna reserva hasta pagar: la
+      // reserva sólo nace cuando el pago en Wompi queda aprobado.
       const pendienteRaw = localStorage.getItem('reservaPendiente');
       if (usuario.rol === 'CLIENTE' && pendienteRaw) {
-        localStorage.removeItem('reservaPendiente');
         try {
-          await crearReserva(JSON.parse(pendienteRaw));
-          navigate('/mis-reservas', { replace: true, state: { aviso: '¡Tu reserva se realizó con éxito!' } });
-        } catch (errReserva) {
-          navigate('/mis-reservas', { replace: true, state: { error: 'Inició sesión, pero la reserva no se pudo crear: ' + getError(errReserva) } });
+          const pend = JSON.parse(pendienteRaw);
+          if (pend?.id_habitacion) {
+            navigate(`/habitacion/${pend.id_habitacion}`, { replace: true });
+            return;
+          }
+        } catch {
+          localStorage.removeItem('reservaPendiente');
         }
-        return;
       }
 
       if (usuario.rol === 'CLIENTE') navigate(from || '/', { replace: true });

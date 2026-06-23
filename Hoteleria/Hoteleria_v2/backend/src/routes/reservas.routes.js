@@ -15,9 +15,13 @@ const {
   hacerCheckOut
 } = require('../controllers/reservas.controller');
 
+// Sólo el personal crea reservas directas (sin pago en línea).
+// El CLIENTE reserva pagando: la reserva nace al aprobarse el pago en Wompi
+// (ver pagos.controller -> confirmarPago / webhookWompi).
 router.post(
   '/',
   authMiddleware,
+  roleMiddleware('ADMIN', 'EMPLEADO'),
   crearReserva
 );
 
