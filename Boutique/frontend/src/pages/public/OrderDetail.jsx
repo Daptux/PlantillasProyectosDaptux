@@ -21,8 +21,7 @@ export default function OrderDetail() {
     setError('');
     try {
       const init = await paymentService.initWompi(order.id);
-      const redirectUrl = `${window.location.origin}/pago/resultado?order=${order.id}`;
-      await openWompiCheckout(init, redirectUrl);
+      await openWompiCheckout(init, order.id);
     } catch (err) {
       setError(err.response?.data?.message || 'No se pudo iniciar el pago');
       setPaying(false);

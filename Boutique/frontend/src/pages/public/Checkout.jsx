@@ -29,6 +29,7 @@ export default function Checkout() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
+  const [redirecting, setRedirecting] = useState(false); // evita redirigir mientras abre Wompi
 
   useEffect(() => {
     if (user) setForm((f) => ({ ...f, nombre_cliente: `${user.nombre} ${user.apellido || ''}`.trim(), telefono: user.telefono || '' }));
@@ -39,10 +40,10 @@ export default function Checkout() {
     if (!isAuth) navigate('/login', { state: { from: { pathname: '/checkout' } } });
   }, [isAuth, navigate]);
 
-  // Si el carrito está vacío (y no acabamos de comprar) -> al carrito
+  // Si el carrito está vacío (y no acabamos de comprar ni estamos abriendo Wompi) -> al carrito
   useEffect(() => {
-    if (!success && cart.items && cart.items.length === 0) navigate('/carrito');
-  }, [cart.items, success, navigate]);
+    if (!success && !redirecting && cart.items && cart.items.length === 0) navigate('/carrito');
+  }, [cart.items, success, redirecting, navigate]);
 
   function set(k, v) { setForm({ ...form, [k]: v }); }
 
@@ -76,10 +77,10 @@ export default function Checkout() {
       if (metodo === 'ONLINE') {
         // El pedido ya trae los datos de Wompi; si no, los pedimos (respaldo)
         const init = order.wompi || await paymentService.initWompi(order.order_id);
-        const redirectUrl = `${window.location.origin}/pago/resultado?order=${order.order_id}`;
+        setRedirecting(true); // evita que el carrito vacío nos saque de la página
         await clearCart();
         await refreshCart();
-        await openWompiCheckout(init, redirectUrl); // abre el modal seguro de Wompi
+        await openWompiCheckout(init, order.order_id); // abre el modal seguro de Wompi
         return;
       }
 
