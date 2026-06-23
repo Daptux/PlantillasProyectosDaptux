@@ -27,7 +27,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 // Middlewares globales
-app.use(cors({ origin: env.frontendUrl, credentials: true }));
+// CORS: permite las URLs de env.frontendUrls (una o varias separadas por coma en FRONTEND_URL).
+// También permite peticiones sin origin (Postman, curl, apps móviles).
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || env.frontendUrls.includes(origin.replace(/\/$/, ''))) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
