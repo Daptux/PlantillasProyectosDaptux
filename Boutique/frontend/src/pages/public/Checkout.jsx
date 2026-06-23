@@ -5,7 +5,7 @@ import { useCart } from '../../context/CartContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useStore } from '../../context/StoreContext.jsx';
 import { orderService } from '../../services/order.service.js';
-import { paymentService, buildWompiCheckoutUrl } from '../../services/payment.service.js';
+import { paymentService, openWompiCheckout } from '../../services/payment.service.js';
 import { resolveImage } from '../../services/api.js';
 import { formatPrice } from '../../utils/format.js';
 import Input from '../../components/forms/Input.jsx';
@@ -72,15 +72,14 @@ export default function Checkout() {
       const payload = { ...form, metodo_pago: metodoPago, cupon_codigo: cuponAplicado?.codigo || undefined };
       const order = await orderService.create(payload);
 
-      // 2a) Pago en línea -> abrir Wompi
+      // 2a) Pago en línea -> abrir el widget de Wompi
       if (metodo === 'ONLINE') {
         // El pedido ya trae los datos de Wompi; si no, los pedimos (respaldo)
         const init = order.wompi || await paymentService.initWompi(order.order_id);
         const redirectUrl = `${window.location.origin}/pago/resultado?order=${order.order_id}`;
-        const url = buildWompiCheckoutUrl(init, redirectUrl);
         await clearCart();
         await refreshCart();
-        window.location.href = url; // redirige a la pasarela
+        await openWompiCheckout(init, redirectUrl); // abre el modal seguro de Wompi
         return;
       }
 
