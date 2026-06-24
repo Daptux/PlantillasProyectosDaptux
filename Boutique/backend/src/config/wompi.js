@@ -47,3 +47,32 @@ export async function fetchTransaction(transactionId) {
   const json = await resp.json();
   return json?.data || null;
 }
+
+// Crea un Payment Link (link de pago) en Wompi. Devuelve { id, ... }.
+// El cliente paga en https://checkout.wompi.co/l/<id> (URL limpia, no bloqueada).
+export async function createPaymentLink({ name, description, amountInCents, redirectUrl }) {
+  const resp = await fetch(`${wompi.apiUrl}/payment_links`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${wompi.privateKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      description,
+      single_use: true,
+      collect_shipping: false,
+      currency: wompi.currency,
+      amount_in_cents: amountInCents,
+      redirect_url: redirectUrl,
+    }),
+  });
+  const json = await resp.json().catch(() => null);
+  if (!resp.ok || !json?.data?.id) {
+    const reason = json?.error?.reason || (json?.error?.messages && JSON.stringify(json.error.messages)) || 'desconocido';
+    throw new Error(`Wompi rechazó la creación del link de pago: ${reason}`);
+  }
+  return json.data;
+}
+
+// URL pública del link de pago
+export function paymentLinkUrl(id) {
+  return `https://checkout.wompi.co/l/${id}`;
+}

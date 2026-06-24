@@ -250,6 +250,7 @@ CREATE TABLE orders (
   total             DECIMAL(12,2) NOT NULL DEFAULT 0,
   cupon_id          INT DEFAULT NULL,
   cupon_codigo      VARCHAR(50) DEFAULT NULL,
+  wompi_link_id     VARCHAR(60) DEFAULT NULL,        -- id del Payment Link de Wompi
   -- estados
   metodo_pago       ENUM('CONTRA_ENTREGA','TRANSFERENCIA','NEQUI','DAVIPLATA','TARJETA') NOT NULL DEFAULT 'CONTRA_ENTREGA',
   estado            ENUM('PENDIENTE','CONFIRMADO','PREPARANDO','ENVIADO','ENTREGADO','CANCELADO') NOT NULL DEFAULT 'PENDIENTE',

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { IoArrowBack, IoLocationOutline, IoReceiptOutline } from 'react-icons/io5';
 import { orderService } from '../../services/order.service.js';
-import { paymentService, openWompiCheckout } from '../../services/payment.service.js';
+import { goToWompiCheckout } from '../../services/payment.service.js';
 import { resolveImage } from '../../services/api.js';
 import { formatPrice, formatDateTime, ORDER_STATUS, PAYMENT_STATUS } from '../../utils/format.js';
 import Loader from '../../components/common/Loader.jsx';
@@ -20,8 +20,7 @@ export default function OrderDetail() {
     setPaying(true);
     setError('');
     try {
-      const init = await paymentService.initWompi(order.id);
-      await openWompiCheckout(init, order.id);
+      await goToWompiCheckout(order.id);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'No se pudo iniciar el pago');
       setPaying(false);

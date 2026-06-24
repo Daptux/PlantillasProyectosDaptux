@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { IoCheckmarkCircle, IoCloseCircle, IoTimeOutline, IoCardOutline } from 'react-icons/io5';
-import { paymentService, openWompiCheckout } from '../../services/payment.service.js';
+import { paymentService, goToWompiCheckout } from '../../services/payment.service.js';
 import { orderService } from '../../services/order.service.js';
 import { formatPrice } from '../../utils/format.js';
 import Loader from '../../components/common/Loader.jsx';
@@ -21,13 +21,12 @@ export default function PaymentResult() {
   const [errMsg, setErrMsg] = useState('');
   const intentos = useRef(0);
 
-  // Abre la pasarela de Wompi para un pedido pendiente
+  // Redirige a la pasarela de Wompi para un pedido pendiente
   async function abrirWompi(ord) {
     setEstado('iniciando');
     setErrMsg('');
     try {
-      const init = await paymentService.initWompi(ord.id);
-      await openWompiCheckout(init, ord.id); // abre el modal; al terminar recarga la página
+      await goToWompiCheckout(ord.id); // redirige el navegador al link de pago
     } catch (e) {
       setErrMsg(e.response?.data?.message || e.message || 'No se pudo abrir la pasarela');
       setEstado('error');
@@ -39,7 +38,7 @@ export default function PaymentResult() {
 
     async function verificar() {
       try {
-        const res = await paymentService.verifyWompi(transactionId);
+        const res = await paymentService.verifyWompi(transactionId, orderId);
         if (cancelado) return;
         setOrder(res.order);
         const s = res.wompi_status;

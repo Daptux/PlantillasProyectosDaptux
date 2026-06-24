@@ -1,9 +1,5 @@
 import { pool } from '../config/db.js';
 import { asyncHandler, ApiError, buildOrderNumber, getPagination } from '../utils/helpers.js';
-import { wompi, integritySignature } from '../config/wompi.js';
-
-// Métodos que se pagan en línea con la pasarela (Wompi)
-const METODOS_ONLINE = ['TARJETA', 'NEQUI', 'DAVIPLATA'];
 
 const ESTADOS = ['PENDIENTE', 'CONFIRMADO', 'PREPARANDO', 'ENVIADO', 'ENTREGADO', 'CANCELADO'];
 const ESTADOS_PAGO = ['PENDIENTE', 'PAGADO', 'RECHAZADO', 'REEMBOLSADO'];
@@ -134,27 +130,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     await conn.query('DELETE FROM cart_items WHERE cart_id = ?', [cartId]);
 
     await conn.commit();
-
-    // Si el pago es en línea, devolvemos ya los datos firmados para abrir Wompi
-    // (evita una segunda llamada y un punto de falla en el checkout).
-    let wompiData = null;
-    const metodoFinal = metodo_pago || 'CONTRA_ENTREGA';
-    if (METODOS_ONLINE.includes(metodoFinal) && wompi.publicKey && wompi.integritySecret) {
-      const amountInCents = Math.round(Number(total) * 100);
-      wompiData = {
-        publicKey: wompi.publicKey,
-        checkoutUrl: wompi.checkoutUrl,
-        currency: wompi.currency,
-        amountInCents,
-        reference: numero,
-        signature: integritySignature(numero, amountInCents, wompi.currency),
-        email: req.user.email,
-        fullName: nombre_cliente || req.user.nombre,
-        phone: telefono || req.user.telefono,
-      };
-    }
-
-    res.status(201).json({ message: 'Pedido creado', order_id: orderId, numero, total, wompi: wompiData });
+    res.status(201).json({ message: 'Pedido creado', order_id: orderId, numero, total });
   } catch (err) {
     await conn.rollback();
     throw err;
