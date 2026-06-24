@@ -17,17 +17,25 @@ function loadWompiWidget() {
     script.src = 'https://checkout.wompi.co/widget.js';
     script.async = true;
     script.onload = () => resolve();
-    script.onerror = () => { widgetPromise = null; reject(new Error('No se pudo cargar la pasarela de Wompi. Revisa tu conexión o desactiva el bloqueador de anuncios.')); };
+    script.onerror = () => {
+      widgetPromise = null;
+      reject(new Error('No se pudo cargar Wompi. Desactiva el bloqueador de anuncios o revisa tu conexión.'));
+    };
     document.body.appendChild(script);
   });
   return widgetPromise;
 }
 
-// Abre el widget (modal seguro) de Wompi. Cuando el usuario termina, el callback
-// entrega la transacción y navegamos a /pago/resultado para verificar el estado.
+// Abre el widget (modal) de Wompi. Al terminar, navega a /pago/resultado para verificar.
+// onResult(transaction|null) opcional para manejar el cierre sin pagar.
 export async function openWompiCheckout(init, orderId) {
   await loadWompiWidget();
-  if (!window.WidgetCheckout) throw new Error('La pasarela de Wompi no está disponible');
+  if (!window.WidgetCheckout) throw new Error('La pasarela de Wompi no está disponible en este momento.');
+
+  const customerData = {};
+  if (init.email) customerData.email = init.email;
+  if (init.fullName) customerData.fullName = init.fullName;
+  if (init.phone) customerData.phoneNumber = String(init.phone);
 
   const checkout = new window.WidgetCheckout({
     currency: init.currency,
@@ -35,17 +43,17 @@ export async function openWompiCheckout(init, orderId) {
     reference: init.reference,
     publicKey: init.publicKey,
     signature: { integrity: init.signature },
-    customerData: {
-      email: init.email,
-      fullName: init.fullName,
-      phoneNumber: init.phone,
-    },
+    ...(Object.keys(customerData).length ? { customerData } : {}),
   });
 
   checkout.open((result) => {
     const tx = result && result.transaction;
-    const idParam = tx && tx.id ? `&id=${tx.id}` : '';
-    // Navegación completa para que la página de resultado verifique con el backend
-    window.location.assign(`/pago/resultado?order=${orderId}${idParam}`);
+    if (tx && tx.id) {
+      // Pagó (o intentó): vamos a verificar el estado real con el backend
+      window.location.assign(`/pago/resultado?order=${orderId}&id=${tx.id}`);
+    } else {
+      // Cerró sin completar: al detalle del pedido para reintentar (evita bucle)
+      window.location.assign(`/mis-pedidos/${orderId}`);
+    }
   });
 }

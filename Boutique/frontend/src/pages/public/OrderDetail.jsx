@@ -23,7 +23,7 @@ export default function OrderDetail() {
       const init = await paymentService.initWompi(order.id);
       await openWompiCheckout(init, order.id);
     } catch (err) {
-      setError(err.response?.data?.message || 'No se pudo iniciar el pago');
+      setError(err.response?.data?.message || err.message || 'No se pudo iniciar el pago');
       setPaying(false);
     }
   }

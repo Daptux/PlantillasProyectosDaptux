@@ -5,7 +5,6 @@ import { useCart } from '../../context/CartContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useStore } from '../../context/StoreContext.jsx';
 import { orderService } from '../../services/order.service.js';
-import { paymentService, openWompiCheckout } from '../../services/payment.service.js';
 import { resolveImage } from '../../services/api.js';
 import { formatPrice } from '../../utils/format.js';
 import Input from '../../components/forms/Input.jsx';
@@ -73,14 +72,12 @@ export default function Checkout() {
       const payload = { ...form, metodo_pago: metodoPago, cupon_codigo: cuponAplicado?.codigo || undefined };
       const order = await orderService.create(payload);
 
-      // 2a) Pago en línea -> abrir el widget de Wompi
+      // 2a) Pago en línea -> ir a la página de pago, que abre Wompi de forma segura
       if (metodo === 'ONLINE') {
-        // El pedido ya trae los datos de Wompi; si no, los pedimos (respaldo)
-        const init = order.wompi || await paymentService.initWompi(order.order_id);
         setRedirecting(true); // evita que el carrito vacío nos saque de la página
         await clearCart();
         await refreshCart();
-        await openWompiCheckout(init, order.order_id); // abre el modal seguro de Wompi
+        navigate(`/pago/resultado?order=${order.order_id}`);
         return;
       }
 
@@ -89,7 +86,7 @@ export default function Checkout() {
       await refreshCart();
       setSuccess(order);
     } catch (err) {
-      setError(err.response?.data?.message || 'No se pudo procesar el pedido');
+      setError(err.response?.data?.message || err.message || 'No se pudo procesar el pedido');
       setLoading(false);
     }
   }
