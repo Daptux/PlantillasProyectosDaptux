@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  ─────────────────────────────────────────────────────────────
+  BarberPro Studio — Design tokens
+  Los colores de marca (--brand) se pueden sobreescribir en runtime
+  desde la configuracion de la barberia (ver components/common/BrandProvider).
+  ─────────────────────────────────────────────────────────────
+*/
+
+@layer base {
+  :root {
+    --font-sans: "Inter", system-ui, sans-serif;
+    --font-display: "Poppins", var(--font-sans);
+
+    /* Modo claro (por defecto para el panel) */
+    --background: 40 30% 98%;
+    --foreground: 20 14% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 14% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 10%;
+
+    --primary: 20 14% 10%;
+    --primary-foreground: 40 30% 98%;
+
+    --secondary: 30 10% 94%;
+    --secondary-foreground: 20 14% 12%;
+
+    --muted: 30 10% 94%;
+    --muted-foreground: 25 8% 45%;
+
+    --accent: 36 45% 92%;
+    --accent-foreground: 24 30% 20%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 12% 88%;
+    --input: 30 12% 88%;
+    --ring: 36 60% 45%;
+
+    /* Marca — dorado/cobre premium */
+    --brand: 36 60% 48%;
+    --brand-foreground: 40 30% 98%;
+    --brand-muted: 36 40% 85%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Modo oscuro — negro carbon + dorado (estetica barberia premium) */
+    --background: 24 10% 7%;
+    --foreground: 40 20% 96%;
+
+    --card: 24 10% 10%;
+    --card-foreground: 40 20% 96%;
+
+    --popover: 24 10% 9%;
+    --popover-foreground: 40 20% 96%;
+
+    --primary: 36 60% 52%;
+    --primary-foreground: 24 20% 8%;
+
+    --secondary: 24 8% 16%;
+    --secondary-foreground: 40 20% 92%;
+
+    --muted: 24 8% 15%;
+    --muted-foreground: 30 8% 62%;
+
+    --accent: 24 10% 18%;
+    --accent-foreground: 40 20% 92%;
+
+    --destructive: 0 65% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 24 8% 18%;
+    --input: 24 8% 20%;
+    --ring: 36 60% 52%;
+
+    --brand: 36 65% 55%;
+    --brand-foreground: 24 20% 8%;
+    --brand-muted: 36 30% 30%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .text-gradient-brand {
+    @apply bg-gradient-to-r from-brand to-amber-400 bg-clip-text text-transparent;
+  }
+  .bg-hero-overlay {
+    background-image: linear-gradient(
+      to top,
+      hsl(24 10% 5% / 0.95),
+      hsl(24 10% 5% / 0.55) 45%,
+      hsl(24 10% 5% / 0.35)
+    );
+  }
+  .glass {
+    @apply bg-card/70 backdrop-blur-md;
+  }
+  /* Ocultar scrollbar horizontal en carruseles */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Scrollbar sutil global */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
