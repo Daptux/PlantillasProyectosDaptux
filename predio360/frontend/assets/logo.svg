@@ -1,0 +1,18 @@
+<svg width="220" height="48" viewBox="0 0 220 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Predio360">
+  <defs>
+    <linearGradient id="p360grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2E9BE6"/>
+      <stop offset="1" stop-color="#0A2540"/>
+    </linearGradient>
+  </defs>
+  <!-- Emblema: parcela + pin geo formando un giro 360 -->
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#p360grad)"/>
+  <path d="M24 11a13 13 0 1 0 12.4 9" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M34.5 12.5l3 .2-.2 3" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 18c-3.6 0-6.5 2.8-6.5 6.3 0 4.6 6.5 10.7 6.5 10.7s6.5-6.1 6.5-10.7C30.5 20.8 27.6 18 24 18z" fill="#FFFFFF"/>
+  <circle cx="24" cy="24.2" r="2.7" fill="#1667B2"/>
+  <!-- Wordmark -->
+  <text x="58" y="24" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" fill="#0A2540" letter-spacing="-0.3">Predio</text>
+  <text x="140" y="24" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" fill="#2E9BE6" letter-spacing="-0.3">360</text>
+  <text x="58" y="39" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="8.4" font-weight="600" fill="#5B7185" letter-spacing="2.6">GESTIÓN PREDIAL</text>
+</svg>
