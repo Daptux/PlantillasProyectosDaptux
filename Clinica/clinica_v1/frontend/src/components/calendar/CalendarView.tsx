@@ -37,6 +37,18 @@ const ESTADO_DOT: Record<EstadoCita, string> = {
   NO_ASISTIO: "bg-destructive",
 };
 
+// Borde lateral de la tarjeta de cita segun estado.
+const ESTADO_BORDER: Record<EstadoCita, string> = {
+  SOLICITADA: "border-l-amber-500",
+  PENDIENTE_DOCUMENTOS: "border-l-amber-500",
+  CONFIRMADA: "border-l-primary",
+  EN_ESPERA: "border-l-secondary",
+  EN_ATENCION: "border-l-secondary",
+  ATENDIDA: "border-l-emerald-500",
+  CANCELADA: "border-l-destructive",
+  NO_ASISTIO: "border-l-destructive",
+};
+
 const DIAS_SEMANA = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
 
 /** Calendario visual de citas con vistas mes/semana/dia. */
@@ -83,7 +95,7 @@ export default function CalendarView({ citas, onSelectCita, onCreateAt }: Props)
   return (
     <div className="space-y-4">
       {/* Barra superior */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={() => navegar(-1)} aria-label="Anterior">
             <ChevronLeft className="h-4 w-4" />
@@ -94,17 +106,17 @@ export default function CalendarView({ citas, onSelectCita, onCreateAt }: Props)
           <Button variant="ghost" size="sm" onClick={() => setCursor(new Date(new Date().setHours(0, 0, 0, 0)))}>
             Hoy
           </Button>
-          <h2 className="ml-1 text-lg font-bold capitalize">{titulo}</h2>
+          <h2 className="ml-1 truncate text-base font-bold capitalize sm:text-lg">{titulo}</h2>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border p-0.5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-1 rounded-lg border p-0.5 sm:flex-none">
             {(["month", "week", "day"] as Vista[]).map((v) => (
               <button
                 key={v}
                 onClick={() => setVista(v)}
                 className={cn(
-                  "rounded-md px-3 py-1 text-sm font-medium transition-colors",
+                  "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors sm:flex-none",
                   vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -114,7 +126,7 @@ export default function CalendarView({ citas, onSelectCita, onCreateAt }: Props)
           </div>
           {onCreateAt && (
             <Button size="sm" onClick={() => onCreateAt(cursor)}>
-              <Plus className="h-4 w-4" /> Nueva cita
+              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Nueva cita</span>
             </Button>
           )}
         </div>
@@ -315,8 +327,10 @@ function CitaCard({
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-start gap-2 rounded-lg border-l-4 bg-muted/30 p-2 text-left transition-colors hover:bg-muted"
-      style={{ borderLeftColor: "transparent" }}
+      className={cn(
+        "flex w-full items-start gap-2 rounded-lg border-l-4 bg-muted/30 p-2 text-left transition-colors hover:bg-muted",
+        ESTADO_BORDER[cita.estado]
+      )}
     >
       <span className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", ESTADO_DOT[cita.estado])} />
       <div className="min-w-0 flex-1">

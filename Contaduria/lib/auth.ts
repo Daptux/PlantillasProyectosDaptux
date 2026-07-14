@@ -75,11 +75,25 @@ export async function clearSessionCookie(): Promise<void> {
   cookies().delete(SESSION_COOKIE);
 }
 
-/** Devuelve la sesion actual leyendo la cookie. null si no hay sesion valida. */
+/** Sesion ficticia para el modo DEMO (sin base de datos). */
+const DEMO_SESSION: SessionPayload = {
+  userId: "demo-user",
+  firmId: "demo-firm",
+  role: "superadmin",
+  name: "Usuario Demo",
+  email: "demo@contahub.com",
+};
+
+/** Devuelve la sesion actual leyendo la cookie. null si no hay sesion valida.
+ *  En modo DEMO (DEMO_MODE=1) devuelve una sesion superadmin ficticia. */
 export async function getSession(): Promise<SessionPayload | null> {
   const token = cookies().get(SESSION_COOKIE)?.value;
-  if (!token) return null;
-  return verifySessionToken(token);
+  if (token) {
+    const session = await verifySessionToken(token);
+    if (session) return session;
+  }
+  if (process.env.DEMO_MODE === "1") return DEMO_SESSION;
+  return null;
 }
 
 /** Igual que getSession pero lanza si no hay sesion (para rutas protegidas). */

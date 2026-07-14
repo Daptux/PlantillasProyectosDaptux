@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
 import DataTable, { type Column } from "@/components/tables/DataTable";
+import PageHeader from "@/components/layout/PageHeader";
 import PqrsfRespondModal from "@/components/modals/PqrsfRespondModal";
 import { pqrsfService } from "@/services/pqrsfService";
 import { TIPO_PQRSF_LABEL, ESTADO_PQRSF_LABEL, ESTADO_PQRSF_VARIANT, ESTADOS_PQRSF } from "@/lib/pqrsf";
@@ -50,16 +51,16 @@ export default function PqrsfPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">PQRSF</h1>
-          <p className="text-muted-foreground">Gestiona peticiones, quejas, reclamos, sugerencias y felicitaciones.</p>
-        </div>
-        <Select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value as "" | EstadoPqrsf)} className="w-44">
-          <option value="">Todos los estados</option>
-          {ESTADOS_PQRSF.map((s) => <option key={s} value={s}>{ESTADO_PQRSF_LABEL[s]}</option>)}
-        </Select>
-      </div>
+      <PageHeader
+        title="PQRSF"
+        subtitle="Gestiona peticiones, quejas, reclamos, sugerencias y felicitaciones."
+        action={
+          <Select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value as "" | EstadoPqrsf)} className="w-full sm:w-48">
+            <option value="">Todos los estados</option>
+            {ESTADOS_PQRSF.map((s) => <option key={s} value={s}>{ESTADO_PQRSF_LABEL[s]}</option>)}
+          </Select>
+        }
+      />
 
       <DataTable columns={columns} rows={items} getKey={(q) => q.id} loading={isLoading} emptyText="No hay solicitudes" />
 

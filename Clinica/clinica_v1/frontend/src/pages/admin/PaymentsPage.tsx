@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import DataTable, { type Column } from "@/components/tables/DataTable";
+import PageHeader from "@/components/layout/PageHeader";
 import PaymentModal from "@/components/modals/PaymentModal";
 import { paymentsService } from "@/services/paymentsService";
 import {
@@ -56,21 +57,20 @@ export default function PaymentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Pagos y facturacion</h1>
-          <p className="text-muted-foreground">
-            Total recaudado (pagado): <span className="font-semibold text-foreground">{formatCOP(total)}</span>
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value as "" | EstadoPago)} className="w-40">
-            <option value="">Todos los estados</option>
-            {ESTADOS_PAGO.map((s) => <option key={s} value={s}>{ESTADO_PAGO_LABEL[s]}</option>)}
-          </Select>
-          <Button onClick={() => setModalOpen(true)}><Plus className="h-4 w-4" /> Nueva factura</Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Pagos y facturacion"
+        subtitle={`Total recaudado (pagado): ${formatCOP(total)}`}
+        action={<Button onClick={() => setModalOpen(true)}><Plus className="h-4 w-4" /> Nueva factura</Button>}
+      />
+
+      <Select
+        value={estadoFiltro}
+        onChange={(e) => setEstadoFiltro(e.target.value as "" | EstadoPago)}
+        className="w-full sm:w-48"
+      >
+        <option value="">Todos los estados</option>
+        {ESTADOS_PAGO.map((s) => <option key={s} value={s}>{ESTADO_PAGO_LABEL[s]}</option>)}
+      </Select>
 
       <DataTable columns={columns} rows={pagos} getKey={(p) => p.id} loading={isLoading} emptyText="No hay pagos" />
 

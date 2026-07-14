@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Stethoscope, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import DataTable, { type Column } from "@/components/tables/DataTable";
+import PageHeader from "@/components/layout/PageHeader";
 import SimpleFormModal, { type FieldDef } from "@/components/modals/SimpleFormModal";
 import { useCrud } from "@/hooks/useCrud";
 import { specialtiesApi, sedesApi } from "@/services/adminService";
@@ -23,14 +25,36 @@ const SEDE_FIELDS: FieldDef[] = [
 
 export default function CatalogsPage() {
   return (
-    <div className="space-y-10">
-      <div>
-        <h1 className="text-2xl font-bold">Catalogos</h1>
-        <p className="text-muted-foreground">Especialidades y sedes de la clinica.</p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader title="Catalogos" subtitle="Especialidades y sedes de la clinica." />
       <SpecialtiesSection />
       <SedesSection />
     </div>
+  );
+}
+
+/** Encabezado de tarjeta con icono, titulo y boton de "Nueva". */
+function SectionHeader({
+  icon: Icon,
+  title,
+  onNew,
+}: {
+  icon: React.ElementType;
+  title: string;
+  onNew: () => void;
+}) {
+  return (
+    <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 border-b">
+      <div className="flex items-center gap-2 font-bold">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="h-4 w-4" />
+        </span>
+        {title}
+      </div>
+      <Button size="sm" onClick={onNew}>
+        <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Nueva</span>
+      </Button>
+    </CardHeader>
   );
 }
 
@@ -61,12 +85,11 @@ function SpecialtiesSection() {
   ];
 
   return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">Especialidades</h2>
-        <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4" /> Nueva</Button>
-      </div>
-      <DataTable columns={columns} rows={list.data ?? []} getKey={(e) => e.id} loading={list.isLoading} emptyText="Sin especialidades" />
+    <Card>
+      <SectionHeader icon={Stethoscope} title="Especialidades" onNew={() => { setEditing(null); setOpen(true); }} />
+      <CardContent className="p-4">
+        <DataTable columns={columns} rows={list.data ?? []} getKey={(e) => e.id} loading={list.isLoading} emptyText="Sin especialidades" />
+      </CardContent>
       <SimpleFormModal
         open={open}
         onClose={() => setOpen(false)}
@@ -75,7 +98,7 @@ function SpecialtiesSection() {
         initial={{ nombre: editing?.nombre ?? "", descripcion: editing?.descripcion ?? "", icono: editing?.icono ?? "" }}
         onSave={onSave}
       />
-    </section>
+    </Card>
   );
 }
 
@@ -108,12 +131,11 @@ function SedesSection() {
   ];
 
   return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">Sedes</h2>
-        <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4" /> Nueva</Button>
-      </div>
-      <DataTable columns={columns} rows={list.data ?? []} getKey={(s) => s.id} loading={list.isLoading} emptyText="Sin sedes" />
+    <Card>
+      <SectionHeader icon={Building2} title="Sedes" onNew={() => { setEditing(null); setOpen(true); }} />
+      <CardContent className="p-4">
+        <DataTable columns={columns} rows={list.data ?? []} getKey={(s) => s.id} loading={list.isLoading} emptyText="Sin sedes" />
+      </CardContent>
       <SimpleFormModal
         open={open}
         onClose={() => setOpen(false)}
@@ -128,6 +150,6 @@ function SedesSection() {
         }}
         onSave={onSave}
       />
-    </section>
+    </Card>
   );
 }

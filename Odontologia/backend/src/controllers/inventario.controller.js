@@ -146,7 +146,7 @@ async function alertas(req, res, next) {
     const [porVencer] = await pool.query(
       `SELECT * FROM inventario
         WHERE estado = 1 AND fecha_vencimiento IS NOT NULL
-          AND fecha_vencimiento BETWEEN CURRENT_DATE AND DATE_ADD(CURRENT_DATE, INTERVAL 30 DAY)`
+          AND fecha_vencimiento BETWEEN CURRENT_DATE AND (CURRENT_DATE + INTERVAL '30 day')`
     );
     res.json({ ok: true, datos: { stock_bajo: stockBajo, vencidos, por_vencer: porVencer } });
   } catch (err) { next(err); }

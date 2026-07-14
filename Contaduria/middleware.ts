@@ -24,6 +24,16 @@ async function verify(token: string) {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Modo DEMO (sin BD): acceso libre al panel. La raiz y el login van directo
+  // al dashboard para recorrer todas las secciones sin credenciales.
+  if (process.env.DEMO_MODE === "1") {
+    if (pathname === "/" || pathname === "/login") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+    return NextResponse.next();
+  }
+
   const token = req.cookies.get(SESSION_COOKIE)?.value;
   const session = token ? await verify(token) : null;
 

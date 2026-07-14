@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import DataTable, { type Column } from "@/components/tables/DataTable";
+import PageHeader from "@/components/layout/PageHeader";
+import SearchInput from "@/components/ui/search-input";
 import PatientModal from "@/components/modals/PatientModal";
 import { useCrud } from "@/hooks/useCrud";
 import { patientsApi } from "@/services/adminService";
@@ -53,23 +54,13 @@ export default function PatientsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Pacientes</h1>
-          <p className="text-muted-foreground">Gestiona las fichas de pacientes de la clinica.</p>
-        </div>
-        <Button onClick={abrirNuevo}><Plus className="h-4 w-4" /> Nuevo paciente</Button>
-      </div>
+      <PageHeader
+        title="Pacientes"
+        subtitle="Gestiona las fichas de pacientes de la clinica."
+        action={<Button onClick={abrirNuevo}><Plus className="h-4 w-4" /> Nuevo paciente</Button>}
+      />
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          className="pl-9"
-          placeholder="Buscar por nombre o documento..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+      <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o documento..." />
 
       <DataTable
         columns={columns}

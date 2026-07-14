@@ -129,7 +129,7 @@ async function actualizarConfiguracion(req, res, next) {
     for (const [clave, valor] of entradas) {
       await pool.query(
         `INSERT INTO configuracion_clinica (clave, valor) VALUES (?, ?)
-         ON DUPLICATE KEY UPDATE valor = VALUES(valor)`,
+         ON CONFLICT (clave) DO UPDATE SET valor = EXCLUDED.valor`,
         [clave, valor]
       );
     }

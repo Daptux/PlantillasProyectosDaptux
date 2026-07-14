@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Download, Trash2, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DataTable, { type Column } from "@/components/tables/DataTable";
+import PageHeader from "@/components/layout/PageHeader";
 import ResultUploadModal from "@/components/modals/ResultUploadModal";
 import { resultsService } from "@/services/resultsService";
 import type { ResultadoMedico } from "@/types";
@@ -35,7 +36,14 @@ export default function ResultsPage() {
     { header: "Fecha", cell: (r) => r.fecha_resultado ?? r.created_at.slice(0, 10) },
     {
       header: "Archivo",
-      cell: (r) => (r.url ? <Paperclip className="h-4 w-4 text-primary" /> : <span className="text-muted-foreground">—</span>),
+      cell: (r) =>
+        r.url ? (
+          <span className="inline-flex items-center gap-1 text-primary">
+            <Paperclip className="h-3.5 w-3.5" /> Adjunto
+          </span>
+        ) : (
+          <span className="text-muted-foreground">Sin archivo</span>
+        ),
     },
     {
       header: "",
@@ -57,13 +65,11 @@ export default function ResultsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Resultados medicos</h1>
-          <p className="text-muted-foreground">Carga y administra los resultados de los pacientes.</p>
-        </div>
-        <Button onClick={() => setModalOpen(true)}><Plus className="h-4 w-4" /> Cargar resultado</Button>
-      </div>
+      <PageHeader
+        title="Resultados medicos"
+        subtitle="Carga y administra los resultados de los pacientes."
+        action={<Button onClick={() => setModalOpen(true)}><Plus className="h-4 w-4" /> Cargar resultado</Button>}
+      />
 
       <DataTable columns={columns} rows={resultados} getKey={(r) => r.id} loading={isLoading} emptyText="No hay resultados" />
 

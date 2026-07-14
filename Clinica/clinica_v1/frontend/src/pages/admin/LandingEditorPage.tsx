@@ -68,7 +68,7 @@ export default function LandingEditorPage() {
           <h2 className="font-semibold">Hero (encabezado)</h2>
           {field(hero, setHero, "titulo", "Titulo")}
           {field(hero, setHero, "subtitulo", "Subtitulo", true)}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {field(hero, setHero, "cta", "Texto del boton")}
             {field(hero, setHero, "imagen", "URL imagen")}
           </div>
@@ -78,7 +78,7 @@ export default function LandingEditorPage() {
       <Card>
         <CardContent className="space-y-4 p-6">
           <h2 className="font-semibold">Contacto</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {field(contacto, setContacto, "telefono", "Telefono")}
             {field(contacto, setContacto, "whatsapp", "WhatsApp")}
             {field(contacto, setContacto, "email", "Email")}

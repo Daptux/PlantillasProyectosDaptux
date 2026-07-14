@@ -20,8 +20,8 @@ export default function DoctorDashboard() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Citas de hoy" value={data?.citasHoy ?? 0} icon={CalendarDays} loading={isLoading} />
-        <StatCard label="Proximas citas" value={data?.citasProximas ?? 0} icon={CalendarClock} loading={isLoading} color="text-secondary bg-secondary/10" />
+        <StatCard label="Citas de hoy" value={data?.citasHoy ?? 0} icon={CalendarDays} loading={isLoading} to="/medico/agenda" />
+        <StatCard label="Proximas citas" value={data?.citasProximas ?? 0} icon={CalendarClock} loading={isLoading} color="text-secondary bg-secondary/10" to="/medico/agenda" />
         <StatCard label="Pacientes atendidos" value={data?.pacientes ?? 0} icon={Users} loading={isLoading} color="text-emerald-600 bg-emerald-100" />
       </div>
 

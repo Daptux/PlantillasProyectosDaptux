@@ -3,7 +3,6 @@
 
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 require('dotenv').config();
 
 const { noEncontrado, manejadorErrores } = require('./middlewares/error.middleware');
@@ -29,9 +28,6 @@ const app = express();
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
-
-// Archivos subidos (multer) servidos estáticamente
-app.use('/uploads', express.static(path.join(__dirname, '..', process.env.UPLOAD_DIR || 'uploads')));
 
 // Healthcheck
 app.get('/api/health', (req, res) => res.json({ ok: true, mensaje: 'OdontoAdmin Pro API en línea 🦷' }));

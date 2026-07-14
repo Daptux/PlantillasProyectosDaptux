@@ -69,15 +69,15 @@ export default function PatientDocumentsPage() {
         <p className="text-muted-foreground">Sube ordenes, autorizaciones y examenes previos (PDF, JPG, PNG, WEBP — max 10MB).</p>
       </div>
 
-      <div className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4">
+      <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="space-y-1.5">
           <Label>Tipo de documento</Label>
-          <Select value={tipo} onChange={(e) => setTipo(e.target.value as TipoDocumento)} className="w-56">
+          <Select value={tipo} onChange={(e) => setTipo(e.target.value as TipoDocumento)} className="w-full sm:w-56">
             {TIPOS_DOCUMENTO.map((t) => <option key={t} value={t}>{TIPO_DOC_LABEL[t]}</option>)}
           </Select>
         </div>
         <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" className="hidden" onChange={onPick} />
-        <Button onClick={() => fileRef.current?.click()} disabled={uploadMut.isPending}>
+        <Button onClick={() => fileRef.current?.click()} disabled={uploadMut.isPending} className="w-full sm:w-auto">
           <Upload className="h-4 w-4" /> {uploadMut.isPending ? "Subiendo..." : "Subir documento"}
         </Button>
       </div>

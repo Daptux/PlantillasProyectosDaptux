@@ -1,14 +1,14 @@
 {
   "name": "odontoadmin-backend",
   "version": "1.0.0",
-  "description": "API REST de OdontoAdmin Pro - Sistema administrativo para clínica odontológica",
+  "description": "API REST de OdontoAdmin Pro - Sistema administrativo para clínica odontológica (PostgreSQL)",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
   },
-  "keywords": ["odontologia", "clinica", "express", "mysql", "jwt"],
+  "keywords": ["odontologia", "clinica", "express", "postgres", "jwt"],
   "author": "Daptux",
   "license": "MIT",
   "dependencies": {
@@ -17,8 +17,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.0",
-    "mysql2": "^3.11.0"
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

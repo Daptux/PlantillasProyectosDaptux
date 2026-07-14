@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import DataTable, { type Column } from "@/components/tables/DataTable";
+import PageHeader from "@/components/layout/PageHeader";
+import SearchInput from "@/components/ui/search-input";
 import ServiceModal from "@/components/modals/ServiceModal";
 import { useCrud } from "@/hooks/useCrud";
 import { servicesApi, specialtiesApi, sedesApi } from "@/services/adminService";
@@ -17,6 +19,18 @@ export default function ServicesPage() {
   const { list: sedes } = useCrud<Sede>("sedes", sedesApi);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Servicio | null>(null);
+  const [search, setSearch] = useState("");
+
+  const filtrados = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const data = list.data ?? [];
+    if (!q) return data;
+    return data.filter(
+      (s) =>
+        s.nombre.toLowerCase().includes(q) ||
+        (s.especialidad_nombre ?? "").toLowerCase().includes(q)
+    );
+  }, [list.data, search]);
 
   const sedeNombre = (id: number) => sedes.data?.find((s) => s.id === id)?.nombre ?? `#${id}`;
 
@@ -64,15 +78,15 @@ export default function ServicesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Servicios</h1>
-          <p className="text-muted-foreground">Catalogo de servicios y su disponibilidad por sede.</p>
-        </div>
-        <Button onClick={() => { setEditing(null); setModalOpen(true); }}><Plus className="h-4 w-4" /> Nuevo servicio</Button>
-      </div>
+      <PageHeader
+        title="Servicios"
+        subtitle="Catalogo de servicios y su disponibilidad por sede."
+        action={<Button onClick={() => { setEditing(null); setModalOpen(true); }}><Plus className="h-4 w-4" /> Nuevo servicio</Button>}
+      />
 
-      <DataTable columns={columns} rows={list.data ?? []} getKey={(s) => s.id} loading={list.isLoading} emptyText="No hay servicios" />
+      <SearchInput value={search} onChange={setSearch} placeholder="Buscar por servicio o especialidad..." />
+
+      <DataTable columns={columns} rows={filtrados} getKey={(s) => s.id} loading={list.isLoading} emptyText="No hay servicios" />
 
       <ServiceModal
         open={modalOpen}

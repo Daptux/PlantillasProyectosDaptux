@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import DataTable, { type Column } from "@/components/tables/DataTable";
+import PageHeader from "@/components/layout/PageHeader";
 import DoctorModal from "@/components/modals/DoctorModal";
 import ScheduleModal from "@/components/modals/ScheduleModal";
 import { useCrud } from "@/hooks/useCrud";
@@ -68,13 +69,11 @@ export default function DoctorsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Medicos</h1>
-          <p className="text-muted-foreground">Perfiles profesionales, especialidades y agenda.</p>
-        </div>
-        <Button onClick={() => { setEditing(null); setModalOpen(true); }}><Plus className="h-4 w-4" /> Nuevo medico</Button>
-      </div>
+      <PageHeader
+        title="Medicos"
+        subtitle="Perfiles profesionales, especialidades y agenda."
+        action={<Button onClick={() => { setEditing(null); setModalOpen(true); }}><Plus className="h-4 w-4" /> Nuevo medico</Button>}
+      />
 
       <DataTable columns={columns} rows={list.data ?? []} getKey={(m) => m.id} loading={list.isLoading} emptyText="No hay medicos" />
 
